@@ -1,0 +1,19 @@
+services:
+  app:
+    build: .
+    image: intranet-platform:latest
+    container_name: intranet-platform
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - DATABASE_PATH=/app/data/app.db
+      - UPLOAD_DIR=/app/storage/uploads
+      # Generated on first run by scripts/setup.mjs if left unset. Supply
+      # your own for stability across rebuilds.
+      # - SESSION_SECRET=replace-me
+    volumes:
+      - ./data:/app/data
+      - ./storage/uploads:/app/storage/uploads

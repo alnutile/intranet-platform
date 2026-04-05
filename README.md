@@ -1,73 +1,137 @@
 # Intranet Platform
 
-An open-source, self-hosted intranet foundation for running your own **private "vibe-coded" sub-apps** behind a single auth layer.
+An open-source, self-hosted **WordPress-style plugin host** for your own
+private React apps. One self-hosted wrapper, one login, as many little
+personal apps as you like — wine tracker, book log, home inventory, recipe
+box — each a plugin you either write yourself, install from a GitHub URL,
+or (soon) generate from a prompt.
 
-> The idea: you host one thing. Inside it you ship as many little personal apps as you like (wine tracker, book log, home inventory, recipe box, whatever you dream up with AI). Each sub-app gets its own database tables, storage, routes, and UI — but users only ever log in once, and only the people you invite can see anything at all.
+> Unlike WordPress, this isn't a CMS. Plugins are real React apps. The
+> platform's job is auth, access control, a plugin contract, and a place
+> for each plugin to store its data.
 
-## Features
+## What you get
 
-- **Closed-by-default registration** — the very first person to hit `/register` becomes the admin. After that, public registration is locked. New users only get in via an invite token.
-- **Invite system** — admins generate invite links from the admin panel.
-- **SQLite** via `better-sqlite3` — zero-config, one file on disk (`data/app.db`).
-- **Sub-app architecture** — drop a folder into `apps/<name>/` with a manifest, schema, server routes, and React pages. It gets auto-mounted.
-- **Per-app access control** — admin picks which users can see which apps.
-- **File storage** — uploads land in `storage/uploads/<app>/`, served via authenticated routes.
-- **shadcn-style UI** — Tailwind + Radix primitives, inlined (no CLI codegen) so it's easy to extend.
-- **Sample app: Wine Tracker** — demonstrates photo upload, schema, list/detail views.
+- **Closed-by-default auth.** The first person to register becomes the admin;
+  public signup locks automatically. Everyone else joins via invite link.
+- **One database, one auth, N apps.** Each plugin lives in `apps/<id>/` and
+  gets its own URL (`/apps/<id>`), its own API namespace
+  (`/api/apps/<id>/...`), its own SQLite tables (`app_<id>_*`), and its own
+  upload folder.
+- **Install plugins from GitHub, at runtime, without a server restart.**
+  Paste a repo URL into the admin panel — the platform clones it, builds
+  the client, runs any new migrations, and hot-mounts it live.
+- **Bring your own backend if you want.** Plugins are free to skip the
+  platform's SQLite entirely and talk to Supabase / a public API / whatever.
+  The plugin contract is "ship a `manifest.json` and a React mount function";
+  server code and migrations are optional.
+- **Per-plugin access control.** Admin picks which users can see which
+  plugins. Admins see everything by default.
 
-## Stack
+## Self-hosting
 
-- Frontend: Vite + React 18 + TypeScript + Tailwind + Radix UI + React Router
-- Backend: Express + better-sqlite3 + bcryptjs + cookie sessions + multer
-- Everything runs as one Node process in production.
+```bash
+git clone <this-repo> intranet-platform
+cd intranet-platform
+docker compose up --build
+```
 
-## Quick start
+Open **http://localhost:3001**, fill out the register form — you become the
+admin, and public signup locks immediately.
+
+Volumes `./data` (SQLite + session store) and `./storage/uploads`
+(user-uploaded files) survive container rebuilds.
+
+### Without Docker
 
 ```bash
 npm install
-npm run migrate      # creates data/app.db and runs core + app migrations
-npm run dev          # starts server (3001) and Vite client (5173)
+npm run setup     # creates .env with a random SESSION_SECRET
+npm run build     # builds the host client bundle
+npm start         # starts Express on :3001 (serves the built client)
 ```
 
-Then open http://localhost:5173 and register — you'll become the admin.
+For local development with hot reload on both sides:
+
+```bash
+npm run dev       # server on :3001, Vite dev server on :5173
+```
+
+## Installing a plugin from GitHub
+
+1. Sign in as admin → **Plugins** (top nav) → **Install from GitHub**.
+2. Paste a `https://github.com/<owner>/<repo>` URL and (optionally) a branch.
+3. Hit **Install**. The platform will:
+   - shallow-clone the repo,
+   - validate `manifest.json`,
+   - build the client bundle,
+   - run any new migrations,
+   - hot-mount the server router (no restart required).
+
+The new plugin immediately shows up on the dashboard for you (and for any
+members you grant access to under **Admin → Users**).
+
+## Writing a plugin
+
+Full contract: [`docs/APP_SPEC.md`](docs/APP_SPEC.md).
+
+Minimum viable plugin:
+
+```
+my-plugin/
+├── manifest.json                     # { id, name, icon, entry }
+└── client/src/main.tsx               # default-exports mount(el, ctx)
+```
+
+With server + migrations (if you want to use the platform's SQLite):
+
+```
+my-plugin/
+├── manifest.json
+├── migrations/001_init.sql
+├── server/index.ts                   # default-exports an Express Router
+└── client/src/main.tsx
+```
+
+See `apps/wine-tracker/` in this repo for a working reference with photo
+uploads, server routes, and migrations.
 
 ## Project layout
 
 ```
-server/                 Express API, auth, session, sub-app loader
-  src/
-    index.ts            Entry point
-    db/                 SQLite connection + migrations
-    routes/             auth, invites, users, apps, uploads
-    middleware/         requireAuth, requireAdmin, requireAppAccess
-    lib/                app-loader (scans apps/ and mounts them)
-client/                 Vite React app
-  src/
-    pages/              Login, Register, Dashboard, Admin, app host
-    components/ui/      shadcn-style Button, Input, Card, etc.
-    lib/                api client, auth context
-apps/                   Sub-apps live here
-  wine-tracker/
-    manifest.json       id, name, icon, routes
-    migrations/         SQL files prefixed with app id
-    server/index.ts     Express router exported as default
-    client/index.tsx    React component exported as default
-storage/uploads/        User-uploaded files (per app subfolder)
-data/app.db             SQLite database (gitignored)
+server/src/
+  index.ts                Entry point
+  db/                     SQLite connection + core schema + migration runner
+  routes/                 auth, invites, users, apps, admin-apps, health
+  middleware/             requireAuth, requireAdmin, requireAppAccess
+  lib/
+    app-loader.ts         Hot-mount outer/inner router shim
+    app-installer.ts      git clone + validate + install + uninstall
+    plugin-builder.ts     Vite lib-mode build for plugin clients
+    module-cache.ts       Scoped require-cache busting (never touches shared code)
+    uploads.ts            Per-plugin multer storage
+client/src/
+  App.tsx                 Router shell
+  pages/                  Login, Register, Dashboard, Admin, AdminApps, AppHost
+  components/ui/          shadcn-style primitives
+  lib/                    api client, auth context
+apps/
+  wine-tracker/           Reference plugin (full-stack example)
+docs/
+  APP_SPEC.md             Plugin contract
+data/app.db               SQLite database (gitignored)
+storage/uploads/<id>/     User-uploaded files per plugin (gitignored)
 ```
 
-## Writing a new sub-app
+## Roadmap
 
-1. Create `apps/my-app/manifest.json`:
-   ```json
-   { "id": "my-app", "name": "My App", "icon": "Sparkles" }
-   ```
-2. Add migrations in `apps/my-app/migrations/001_init.sql`. Prefix tables with `app_myapp_` to avoid collisions.
-3. Export an Express router from `apps/my-app/server/index.ts`.
-4. Export a React component from `apps/my-app/client/index.tsx`.
-5. Run `npm run migrate` and restart. The app auto-appears in the dashboard for users you grant access.
-
-That's the whole contract. Vibe-code the rest.
+- **Now**: self-hosting + GitHub plugin install + hot-mount (this PR).
+- **Next**: in-app AI builder — describe an app in natural language inside
+  the platform and have Claude scaffold it in seconds.
+- **Then**: MCP server so Claude Desktop / Claude Code / Cursor can all build
+  plugins for this platform from the outside using one shared tool spec.
+- **Later**: in-app Monaco editor with "Ask AI to modify this file"; other
+  providers (OpenAI, Ollama).
 
 ## License
 

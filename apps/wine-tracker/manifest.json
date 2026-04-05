@@ -2,5 +2,6 @@
   "id": "wine-tracker",
   "name": "Wine Tracker",
   "description": "Log wines you've tried. Snap a photo, save tasting notes.",
-  "icon": "Wine"
+  "icon": "Wine",
+  "entry": "client/dist/index.js"
 }

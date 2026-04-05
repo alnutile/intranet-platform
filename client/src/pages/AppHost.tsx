@@ -1,33 +1,67 @@
-import { Suspense, lazy, useMemo } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
+import { useAuth } from "@/lib/auth-context";
+import { api, apiUpload } from "@/lib/api";
 
 /**
- * Dynamically import a sub-app's React entry. Vite's import.meta.glob
- * statically collects every candidate at build time, so new apps only
- * need to follow the path convention: apps/<id>/client/index.tsx.
+ * Mounts a plugin into a managed DOM subtree.
+ *
+ * Each plugin is a self-contained bundle with its own React copy. We don't
+ * render its components as JSX — we give it an element and let it own the
+ * tree via its default-exported `mount(el, ctx)` function. This avoids the
+ * "two copies of React" hook-dispatcher problem and lets plugins bundle
+ * anything they want without conflict.
  */
-const appModules = import.meta.glob("../../../apps/*/client/index.tsx");
-
 export function AppHost() {
   const { appId } = useParams<{ appId: string }>();
+  const { user } = useAuth();
+  const hostRef = useRef<HTMLDivElement>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  const Component = useMemo(() => {
-    const key = Object.keys(appModules).find((k) => k.includes(`/apps/${appId}/client/index.tsx`));
-    if (!key) return null;
-    return lazy(appModules[key] as any);
-  }, [appId]);
+  useEffect(() => {
+    if (!appId || !user || !hostRef.current) return;
+    let unmount: (() => void) | undefined;
+    let disposed = false;
+    setError(null);
 
-  if (!Component) {
-    return (
-      <div className="space-y-4">
-        <p className="text-destructive">Unknown app: {appId}</p>
-        <Button asChild variant="outline">
-          <Link to="/">Back to dashboard</Link>
-        </Button>
-      </div>
-    );
-  }
+    const el = hostRef.current;
+    el.innerHTML = ""; // clean slate on route change
+
+    // Plugin-scoped API helpers — these prefix /api/apps/<appId> so plugin
+    // code can just call `ctx.api("/wines")` without thinking about paths.
+    const pluginApi = <T,>(path: string, opts?: RequestInit) =>
+      api<T>(`/api/apps/${appId}${path}`, opts);
+    const pluginUpload = <T,>(path: string, form: FormData) =>
+      apiUpload<T>(`/api/apps/${appId}${path}`, form);
+
+    // Cache-bust so a fresh install / reload picks up the new bundle.
+    const url = `/plugin-assets/${appId}/index.js?t=${Date.now()}`;
+
+    import(/* @vite-ignore */ url)
+      .then((mod) => {
+        if (disposed) return;
+        const pluginMount = mod.default;
+        if (typeof pluginMount !== "function") {
+          throw new Error("plugin did not default-export a mount function");
+        }
+        unmount = pluginMount(el, {
+          api: pluginApi,
+          upload: pluginUpload,
+          user,
+        });
+      })
+      .catch((e) => {
+        if (!disposed) setError(e.message || "failed to load plugin");
+      });
+
+    return () => {
+      disposed = true;
+      try {
+        unmount?.();
+      } catch {}
+      el.innerHTML = "";
+    };
+  }, [appId, user]);
 
   return (
     <div className="space-y-4">
@@ -36,9 +70,12 @@ export function AppHost() {
           ← Dashboard
         </Link>
       </div>
-      <Suspense fallback={<p className="text-muted-foreground">Loading app…</p>}>
-        <Component />
-      </Suspense>
+      {error && (
+        <div className="rounded-md border border-destructive/50 bg-destructive/10 p-4 text-sm text-destructive">
+          {error}
+        </div>
+      )}
+      <div ref={hostRef} />
     </div>
   );
 }

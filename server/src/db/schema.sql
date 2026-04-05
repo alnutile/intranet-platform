@@ -49,3 +49,13 @@ CREATE TABLE IF NOT EXISTS settings (
   key TEXT PRIMARY KEY,
   value TEXT NOT NULL
 );
+
+-- Record of where each installed plugin came from. Bundled apps (shipped in
+-- the repo) are seeded on first boot as source = 'bundled'.
+CREATE TABLE IF NOT EXISTS installed_apps (
+  id TEXT PRIMARY KEY,
+  source TEXT NOT NULL CHECK (source IN ('bundled', 'git', 'ai')),
+  repo TEXT,
+  ref TEXT,
+  installed_at INTEGER NOT NULL DEFAULT (strftime('%s','now'))
+);

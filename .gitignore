@@ -1,10 +1,14 @@
 node_modules/
 dist/
 server/dist/
+server/public/
 data/*.db
 data/*.db-*
 storage/uploads/*
 !storage/uploads/.gitkeep
+apps/.staging/
+apps/*/client/dist/
+apps/*/node_modules/
 .env
 .env.local
 .DS_Store

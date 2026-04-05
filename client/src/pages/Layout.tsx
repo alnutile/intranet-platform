@@ -14,9 +14,14 @@ export function Layout() {
           <div className="flex items-center gap-6">
             <Link to="/" className="font-semibold">Intranet</Link>
             {user.role === "admin" && (
-              <Link to="/admin" className="text-sm text-muted-foreground hover:text-foreground">
-                Admin
-              </Link>
+              <>
+                <Link to="/admin" className="text-sm text-muted-foreground hover:text-foreground">
+                  Admin
+                </Link>
+                <Link to="/admin/apps" className="text-sm text-muted-foreground hover:text-foreground">
+                  Plugins
+                </Link>
+              </>
             )}
           </div>
           <div className="flex items-center gap-3">

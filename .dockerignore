@@ -1,0 +1,12 @@
+node_modules
+server/dist
+server/public
+data
+storage/uploads
+apps/.staging
+apps/*/client/dist
+.git
+.env
+.env.local
+*.log
+.DS_Store
