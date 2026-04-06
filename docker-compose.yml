@@ -6,13 +6,12 @@ services:
     restart: unless-stopped
     ports:
       - "3001:3001"
+    env_file:
+      - .env
     environment:
       - NODE_ENV=production
       - PORT=3001
       - DATABASE_PATH=/app/persist/app.db
       - UPLOAD_DIR=/app/persist/uploads
-      # Generated on first run by scripts/setup.mjs if left unset. Supply
-      # your own for stability across rebuilds.
-      # - SESSION_SECRET=replace-me
     volumes:
       - ./persist:/app/persist
