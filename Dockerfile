@@ -21,7 +21,6 @@ FROM node:20-bookworm-slim AS runtime
 
 WORKDIR /app
 ENV NODE_ENV=production
-ENV PORT=3001
 
 # `git` is required so the admin can install plugins from GitHub URLs at
 # runtime. `tsx` (shipped as a runtime dep) handles on-the-fly TypeScript
@@ -38,8 +37,8 @@ RUN mkdir -p /app/data /app/storage/uploads
 VOLUME ["/app/data", "/app/storage/uploads"]
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-  CMD node -e "fetch('http://localhost:3001/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+  CMD node -e "fetch('http://localhost:'+(process.env.PORT||3001)+'/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
 
-EXPOSE 3001
+EXPOSE ${PORT}
 
 CMD ["sh", "-c", "node scripts/setup.mjs && npm start"]
