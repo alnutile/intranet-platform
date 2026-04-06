@@ -31,9 +31,9 @@ RUN apt-get update \
 
 COPY --from=build /app /app
 
-# Single persist directory for DB + uploads. Mount one volume here.
+# Single persist directory for DB + uploads. On Railway, attach a volume
+# at /app/persist via the dashboard (VOLUME keyword is banned there).
 RUN mkdir -p /app/persist/uploads
-VOLUME ["/app/persist"]
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
   CMD node -e "fetch('http://localhost:'+(process.env.PORT||3001)+'/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
