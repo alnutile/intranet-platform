@@ -1,0 +1,7 @@
+{
+  "id": "recipes",
+  "name": "Recipes",
+  "description": "Paste text or snap a photo — AI cleans it up into a proper recipe.",
+  "icon": "ChefHat",
+  "entry": "client/dist/index.js"
+}
