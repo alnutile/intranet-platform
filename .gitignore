@@ -4,6 +4,7 @@ server/dist/
 server/public/
 data/*.db
 data/*.db-*
+persist/
 storage/uploads/*
 !storage/uploads/.gitkeep
 apps/.staging/

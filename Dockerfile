@@ -31,10 +31,9 @@ RUN apt-get update \
 
 COPY --from=build /app /app
 
-# Default data + storage directories. Mount these as volumes in prod so data
-# survives container rebuilds.
-RUN mkdir -p /app/data /app/storage/uploads
-VOLUME ["/app/data", "/app/storage/uploads"]
+# Single persist directory for DB + uploads. Mount one volume here.
+RUN mkdir -p /app/persist/uploads
+VOLUME ["/app/persist"]
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
   CMD node -e "fetch('http://localhost:'+(process.env.PORT||3001)+'/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"

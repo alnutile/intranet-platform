@@ -25,6 +25,8 @@ function ensureDir(p) {
   }
 }
 
+ensureDir(path.join(root, "persist", "uploads"));
+// Legacy paths for local dev without Docker.
 ensureDir(path.join(root, "data"));
 ensureDir(path.join(root, "storage", "uploads"));
 
