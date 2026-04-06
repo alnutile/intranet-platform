@@ -5,6 +5,9 @@ import path from "path";
 export default defineConfig({
   plugins: [react()],
   root: "client",
+  define: {
+    "process.env": "{}",
+  },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./client/src"),
@@ -16,6 +19,7 @@ export default defineConfig({
     proxy: {
       "/api": "http://localhost:3001",
       "/uploads": "http://localhost:3001",
+      "/plugin-assets": "http://localhost:3001",
     },
   },
   build: {
