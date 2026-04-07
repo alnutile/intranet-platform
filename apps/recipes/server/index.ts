@@ -172,7 +172,8 @@ router.get("/", (req, res) => {
   const rows = db
     .prepare(
       `SELECT id, title, description, prep_time, cook_time, servings,
-              cuisine, tags, photo_filename, cover_filename, created_at
+              ingredients, instructions, cuisine, tags, source_text,
+              photo_filename, cover_filename, created_at
        FROM app_recipes_recipes
        ORDER BY created_at DESC`
     )
