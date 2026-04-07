@@ -154,18 +154,18 @@ router.post("/generate-cover", async (req, res) => {
 // ─── CRUD ───────────────────────────────────────────────────────────────────
 
 const recipeSchema = z.object({
-  title: z.string().min(1).max(300),
-  description: z.string().max(2000).optional().nullable(),
-  prep_time: z.string().max(50).optional().nullable(),
-  cook_time: z.string().max(50).optional().nullable(),
-  servings: z.string().max(50).optional().nullable(),
-  ingredients: z.string(), // JSON array
-  instructions: z.string(), // JSON array
-  cuisine: z.string().max(100).optional().nullable(),
-  tags: z.string().optional().nullable(), // JSON array
-  source_text: z.string().max(10000).optional().nullable(),
-  photo_filename: z.string().optional().nullable(),
-  cover_filename: z.string().optional().nullable(),
+  title: z.string().min(1, "Title is required").max(300),
+  description: z.string().max(2000).optional().nullable().default(null),
+  prep_time: z.string().max(50).optional().nullable().default(null),
+  cook_time: z.string().max(50).optional().nullable().default(null),
+  servings: z.string().max(50).optional().nullable().default(null),
+  ingredients: z.string().default("[]"),
+  instructions: z.string().default("[]"),
+  cuisine: z.string().max(100).optional().nullable().default(null),
+  tags: z.string().optional().nullable().default(null),
+  source_text: z.string().max(10000).optional().nullable().default(null),
+  photo_filename: z.string().optional().nullable().default(null),
+  cover_filename: z.string().optional().nullable().default(null),
 });
 
 router.get("/", (req, res) => {
@@ -190,8 +190,10 @@ router.get("/:id", (req, res) => {
 
 router.post("/", upload.single("cover"), (req, res) => {
   const parsed = recipeSchema.safeParse(req.body);
-  if (!parsed.success)
-    return res.status(400).json({ error: "invalid input", details: parsed.error.flatten() });
+  if (!parsed.success) {
+    const issues = parsed.error.issues.map((i) => `${i.path.join(".")}: ${i.message}`);
+    return res.status(400).json({ error: issues.join("; ") || "invalid input" });
+  }
   const d = parsed.data;
   const file = (req as any).file as Express.Multer.File | undefined;
   const coverFilename = d.cover_filename || (file ? file.filename : null);
