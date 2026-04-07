@@ -67,8 +67,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       method: "POST",
       body: JSON.stringify(data),
     });
+    // Set user AND bootstrapped synchronously so Protected doesn't
+    // redirect back to /register before refresh() completes.
     setUser(u);
-    await refresh();
+    setBootstrapped(true);
+    setRegistrationLocked(true);
   };
 
   const logout = async () => {
