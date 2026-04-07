@@ -8,6 +8,7 @@ persist/
 storage/uploads/*
 !storage/uploads/.gitkeep
 apps/.staging/
+_plugin-*/
 apps/*/client/dist/
 apps/*/node_modules/
 .env
