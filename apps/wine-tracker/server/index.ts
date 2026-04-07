@@ -114,10 +114,9 @@ router.get("/wines", (req, res) => {
       `SELECT id, name, winery, vintage, varietal, grape, region, country,
               color, rating, notes, price, purchase_date, photo_filename, created_at
        FROM app_wine_tracker_wines
-       WHERE user_id = ?
        ORDER BY created_at DESC`
     )
-    .all(req.user!.id);
+    .all();
   res.json(rows);
 });
 
@@ -127,9 +126,9 @@ router.get("/wines/:id", (req, res) => {
       `SELECT id, name, winery, vintage, varietal, grape, region, country,
               color, rating, notes, price, purchase_date, photo_filename, created_at
        FROM app_wine_tracker_wines
-       WHERE id = ? AND user_id = ?`
+       WHERE id = ?`
     )
-    .get(Number(req.params.id), req.user!.id);
+    .get(Number(req.params.id));
   if (!row) return res.status(404).json({ error: "not found" });
   res.json(row);
 });
@@ -183,18 +182,17 @@ router.put("/wines/:id", (req, res) => {
   }
   if (fields.length === 0) return res.status(400).json({ error: "nothing to update" });
 
-  values.push(Number(req.params.id), req.user!.id);
+  values.push(Number(req.params.id));
   db.prepare(
     `UPDATE app_wine_tracker_wines SET ${fields.join(", ")}
-     WHERE id = ? AND user_id = ?`
+     WHERE id = ?`
   ).run(...values);
   res.json({ ok: true });
 });
 
 router.delete("/wines/:id", (req, res) => {
-  db.prepare("DELETE FROM app_wine_tracker_wines WHERE id = ? AND user_id = ?").run(
-    Number(req.params.id),
-    req.user!.id
+  db.prepare("DELETE FROM app_wine_tracker_wines WHERE id = ?").run(
+    Number(req.params.id)
   );
   res.json({ ok: true });
 });

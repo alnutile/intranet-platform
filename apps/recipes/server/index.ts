@@ -173,17 +173,17 @@ router.get("/", (req, res) => {
     .prepare(
       `SELECT id, title, description, prep_time, cook_time, servings,
               cuisine, tags, photo_filename, cover_filename, created_at
-       FROM app_recipes_recipes WHERE user_id = ?
+       FROM app_recipes_recipes
        ORDER BY created_at DESC`
     )
-    .all(req.user!.id);
+    .all();
   res.json(rows);
 });
 
 router.get("/:id", (req, res) => {
   const row = db
-    .prepare("SELECT * FROM app_recipes_recipes WHERE id = ? AND user_id = ?")
-    .get(Number(req.params.id), req.user!.id);
+    .prepare("SELECT * FROM app_recipes_recipes WHERE id = ?")
+    .get(Number(req.params.id));
   if (!row) return res.status(404).json({ error: "not found" });
   res.json(row);
 });
@@ -225,8 +225,8 @@ router.post("/", upload.single("cover"), (req, res) => {
 router.put("/:id", (req, res) => {
   const id = Number(req.params.id);
   const existing = db
-    .prepare("SELECT id FROM app_recipes_recipes WHERE id = ? AND user_id = ?")
-    .get(id, req.user!.id);
+    .prepare("SELECT id FROM app_recipes_recipes WHERE id = ?")
+    .get(id);
   if (!existing) return res.status(404).json({ error: "not found" });
 
   const fields: string[] = [];
@@ -239,17 +239,16 @@ router.put("/:id", (req, res) => {
   }
   if (fields.length === 0) return res.status(400).json({ error: "nothing to update" });
   fields.push("updated_at = strftime('%s','now')");
-  values.push(id, req.user!.id);
+  values.push(id);
   db.prepare(
-    `UPDATE app_recipes_recipes SET ${fields.join(", ")} WHERE id = ? AND user_id = ?`
+    `UPDATE app_recipes_recipes SET ${fields.join(", ")} WHERE id = ?`
   ).run(...values);
   res.json({ ok: true });
 });
 
 router.delete("/:id", (req, res) => {
-  db.prepare("DELETE FROM app_recipes_recipes WHERE id = ? AND user_id = ?").run(
-    Number(req.params.id),
-    req.user!.id
+  db.prepare("DELETE FROM app_recipes_recipes WHERE id = ?").run(
+    Number(req.params.id)
   );
   res.json({ ok: true });
 });
