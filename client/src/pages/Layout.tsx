@@ -1,11 +1,13 @@
 import { Link, Outlet, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/ui/button";
+import { useTheme } from "@/hooks/use-theme";
 
 export function Layout() {
   const { user, logout } = useAuth();
   const nav = useNavigate();
   const loc = useLocation();
+  const { resolved, toggle } = useTheme();
   if (!user) return null;
 
   const isActive = (path: string) =>
@@ -36,7 +38,14 @@ export function Layout() {
               )}
             </nav>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={toggle}
+              className="h-8 w-8 rounded-lg border flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-accent/10 transition-colors"
+              title={`Theme: ${resolved}`}
+            >
+              {resolved === "dark" ? "🌙" : "☀️"}
+            </button>
             <div className="hidden sm:flex items-center gap-2">
               <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
                 <span className="text-primary text-sm font-semibold">

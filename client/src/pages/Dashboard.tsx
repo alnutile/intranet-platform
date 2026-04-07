@@ -83,7 +83,7 @@ export function DashboardPage() {
               const colors = ICON_COLORS[iconName] || DEFAULT_COLOR;
               return (
                 <Link key={app.id} to={`/apps/${app.id}`}>
-                  <div className="group rounded-xl border bg-card p-6 transition-all hover:shadow-md hover:border-primary/20 hover:-translate-y-0.5">
+                  <div className="group rounded-xl border bg-card p-6 h-full flex flex-col transition-all hover:shadow-md hover:border-primary/20 hover:-translate-y-0.5">
                     <div className={`h-11 w-11 rounded-xl ${colors.bg} flex items-center justify-center mb-4`}>
                       <Icon className={`h-5 w-5 ${colors.fg}`} />
                     </div>
@@ -91,7 +91,7 @@ export function DashboardPage() {
                       {app.name}
                     </h3>
                     {app.description && (
-                      <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+                      <p className="text-sm text-muted-foreground mt-1 line-clamp-2 flex-1">
                         {app.description}
                       </p>
                     )}
