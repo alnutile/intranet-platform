@@ -1,0 +1,17 @@
+{
+  "name": "sat-book",
+  "version": "1.0.0",
+  "description": "A pain-free GitHub app for sat book projects. No branches, no jargon — just files.",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron . --dev"
+  },
+  "dependencies": {
+    "electron": "^33.0.0",
+    "isomorphic-git": "^1.27.1",
+    "marked": "^15.0.0"
+  },
+  "devDependencies": {},
+  "license": "MIT"
+}

@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline';" />
+  <title>Sat Book</title>
+  <style>
+    /* ─── Reset & Base ─────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d1117;
+      --bg-surface: #161b22;
+      --bg-hover: #1c2128;
+      --bg-active: #252c35;
+      --border: #30363d;
+      --text: #e6edf3;
+      --text-muted: #8b949e;
+      --accent: #58a6ff;
+      --accent-hover: #79c0ff;
+      --green: #3fb950;
+      --red: #f85149;
+      --orange: #d29922;
+      --radius: 8px;
+      --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      --font-mono: "SF Mono", "Fira Code", "Fira Mono", Menlo, monospace;
+    }
+
+    html, body { height: 100%; overflow: hidden; }
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      font-size: 14px;
+      line-height: 1.5;
+      -webkit-app-region: drag;
+    }
+
+    button, input, textarea, select { font-family: inherit; font-size: inherit; }
+    button, input, a { -webkit-app-region: no-drag; }
+
+    /* ─── Utility ──────────────────────────────────────────── */
+    .hidden { display: none !important; }
+
+    .btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 8px 16px; border-radius: var(--radius);
+      border: 1px solid var(--border); background: var(--bg-surface);
+      color: var(--text); cursor: pointer; font-weight: 500;
+      transition: background 0.15s, border-color 0.15s;
+      -webkit-app-region: no-drag;
+    }
+    .btn:hover { background: var(--bg-hover); border-color: var(--text-muted); }
+    .btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .btn-primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+    .btn-danger { color: var(--red); }
+    .btn-danger:hover { background: rgba(248,81,73,0.1); }
+    .btn-sm { padding: 4px 10px; font-size: 12px; }
+    .btn-ghost { border-color: transparent; background: transparent; }
+    .btn-ghost:hover { background: var(--bg-hover); }
+
+    .input {
+      width: 100%; padding: 8px 12px; border-radius: var(--radius);
+      border: 1px solid var(--border); background: var(--bg);
+      color: var(--text); outline: none;
+      transition: border-color 0.15s;
+    }
+    .input:focus { border-color: var(--accent); }
+    .input::placeholder { color: var(--text-muted); }
+
+    /* ─── Screens ──────────────────────────────────────────── */
+    .screen {
+      height: 100vh; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+    }
+
+    /* ── Setup Screen ── */
+    #setup-screen .setup-card {
+      width: 420px; padding: 40px;
+      background: var(--bg-surface); border: 1px solid var(--border);
+      border-radius: 12px;
+    }
+    #setup-screen h1 {
+      font-size: 28px; font-weight: 700; margin-bottom: 4px;
+    }
+    #setup-screen .subtitle {
+      color: var(--text-muted); margin-bottom: 24px;
+    }
+    #setup-screen label {
+      display: block; font-weight: 500; margin-bottom: 6px; margin-top: 16px;
+    }
+    #setup-screen .hint {
+      font-size: 12px; color: var(--text-muted); margin-top: 4px;
+    }
+    #setup-screen .hint a {
+      color: var(--accent); text-decoration: none; cursor: pointer;
+    }
+    #setup-screen .setup-actions {
+      margin-top: 24px; display: flex; gap: 8px;
+    }
+    #setup-screen .folder-row {
+      display: flex; gap: 8px; align-items: center;
+    }
+    #setup-screen .folder-display {
+      flex: 1; padding: 8px 12px; border-radius: var(--radius);
+      background: var(--bg); border: 1px solid var(--border);
+      color: var(--text-muted); font-size: 13px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+
+    /* ── Projects Screen ── */
+    #projects-screen {
+      justify-content: flex-start; padding-top: 48px;
+    }
+    #projects-screen .projects-header {
+      width: 600px; display: flex; justify-content: space-between;
+      align-items: center; margin-bottom: 20px;
+    }
+    #projects-screen h1 { font-size: 24px; }
+    #projects-screen .project-list {
+      width: 600px; display: flex; flex-direction: column; gap: 8px;
+    }
+    .project-card {
+      display: flex; align-items: center; gap: 12px;
+      padding: 16px 20px; background: var(--bg-surface);
+      border: 1px solid var(--border); border-radius: var(--radius);
+      cursor: pointer; transition: border-color 0.15s, background 0.15s;
+    }
+    .project-card:hover { border-color: var(--accent); background: var(--bg-hover); }
+    .project-card .icon {
+      width: 40px; height: 40px; border-radius: 8px;
+      background: var(--bg-active); display: flex;
+      align-items: center; justify-content: center;
+      font-size: 20px; flex-shrink: 0;
+    }
+    .project-card .name { font-weight: 600; }
+    .project-card .path { font-size: 12px; color: var(--text-muted); }
+
+    .empty-state {
+      text-align: center; padding: 60px 20px; color: var(--text-muted);
+    }
+    .empty-state .big-icon { font-size: 48px; margin-bottom: 16px; }
+
+    /* ── New Project Modal ── */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 100;
+    }
+    .modal {
+      width: 440px; padding: 32px; background: var(--bg-surface);
+      border: 1px solid var(--border); border-radius: 12px;
+    }
+    .modal h2 { margin-bottom: 16px; }
+    .modal .actions { margin-top: 20px; display: flex; gap: 8px; justify-content: flex-end; }
+
+    /* Tab bar for new/existing */
+    .tab-bar {
+      display: flex; gap: 0; margin-bottom: 16px;
+      border: 1px solid var(--border); border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .tab-bar button {
+      flex: 1; padding: 8px; border: none; background: var(--bg);
+      color: var(--text-muted); cursor: pointer; font-weight: 500;
+    }
+    .tab-bar button.active { background: var(--bg-active); color: var(--text); }
+
+    .repo-list {
+      max-height: 240px; overflow-y: auto; display: flex;
+      flex-direction: column; gap: 4px;
+    }
+    .repo-item {
+      padding: 8px 12px; border-radius: 6px; cursor: pointer;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .repo-item:hover { background: var(--bg-hover); }
+    .repo-item .repo-name { font-weight: 500; }
+    .repo-item .repo-meta { font-size: 12px; color: var(--text-muted); }
+
+    /* ── Editor Screen ── */
+    #editor-screen {
+      display: flex; flex-direction: row;
+      height: 100vh; justify-content: stretch; align-items: stretch;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 260px; min-width: 200px; background: var(--bg-surface);
+      border-right: 1px solid var(--border);
+      display: flex; flex-direction: column;
+    }
+    .sidebar-header {
+      padding: 12px 16px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 8px;
+      -webkit-app-region: drag;
+    }
+    .sidebar-header .back-btn {
+      -webkit-app-region: no-drag;
+      background: none; border: none; color: var(--text-muted);
+      cursor: pointer; padding: 4px; border-radius: 4px;
+      display: flex; align-items: center;
+    }
+    .sidebar-header .back-btn:hover { color: var(--text); background: var(--bg-hover); }
+    .sidebar-header .project-title {
+      font-weight: 600; font-size: 14px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+
+    .sidebar-actions {
+      padding: 8px; display: flex; gap: 4px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .file-tree {
+      flex: 1; overflow-y: auto; padding: 8px;
+    }
+    .file-tree-item {
+      display: flex; align-items: center; gap: 6px;
+      padding: 5px 8px; border-radius: 6px; cursor: pointer;
+      color: var(--text); font-size: 13px; user-select: none;
+    }
+    .file-tree-item:hover { background: var(--bg-hover); }
+    .file-tree-item.active { background: var(--bg-active); color: var(--accent); }
+    .file-tree-item .file-icon { color: var(--text-muted); font-size: 12px; flex-shrink: 0; width: 16px; text-align: center; }
+    .file-tree-item.dir .file-icon { color: var(--accent); }
+    .file-tree-children { padding-left: 16px; }
+
+    .sidebar-footer {
+      padding: 12px; border-top: 1px solid var(--border);
+      display: flex; flex-direction: column; gap: 6px;
+    }
+
+    /* Editor area */
+    .editor-area {
+      flex: 1; display: flex; flex-direction: column;
+    }
+    .editor-toolbar {
+      padding: 8px 16px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 12px;
+      -webkit-app-region: drag;
+    }
+    .editor-toolbar .filename {
+      font-weight: 600; font-size: 14px;
+    }
+    .editor-toolbar .status {
+      font-size: 12px; color: var(--text-muted); margin-left: auto;
+    }
+    .editor-toolbar .status.saving { color: var(--orange); }
+    .editor-toolbar .status.saved { color: var(--green); }
+
+    .editor-tabs {
+      display: flex; gap: 0; -webkit-app-region: no-drag;
+    }
+    .editor-tab {
+      padding: 4px 12px; border: 1px solid var(--border); border-radius: 6px;
+      background: var(--bg); color: var(--text-muted); cursor: pointer;
+      font-size: 12px; font-weight: 500;
+    }
+    .editor-tab.active { background: var(--bg-active); color: var(--text); }
+    .editor-tab + .editor-tab { margin-left: -1px; }
+
+    .editor-content {
+      flex: 1; display: flex; overflow: hidden;
+    }
+
+    .editor-content textarea {
+      flex: 1; padding: 24px 32px; background: var(--bg);
+      color: var(--text); border: none; outline: none;
+      resize: none; font-family: var(--font-mono);
+      font-size: 14px; line-height: 1.7; tab-size: 2;
+    }
+
+    .markdown-preview {
+      flex: 1; padding: 24px 32px; overflow-y: auto;
+      background: var(--bg);
+    }
+    .markdown-preview h1 { font-size: 2em; margin: 0.67em 0; border-bottom: 1px solid var(--border); padding-bottom: 0.3em; }
+    .markdown-preview h2 { font-size: 1.5em; margin: 0.83em 0; border-bottom: 1px solid var(--border); padding-bottom: 0.3em; }
+    .markdown-preview h3 { font-size: 1.25em; margin: 1em 0; }
+    .markdown-preview p { margin: 1em 0; }
+    .markdown-preview ul, .markdown-preview ol { margin: 1em 0; padding-left: 2em; }
+    .markdown-preview li { margin: 0.25em 0; }
+    .markdown-preview code {
+      background: var(--bg-surface); padding: 2px 6px; border-radius: 4px;
+      font-family: var(--font-mono); font-size: 0.9em;
+    }
+    .markdown-preview pre {
+      background: var(--bg-surface); padding: 16px; border-radius: var(--radius);
+      overflow-x: auto; margin: 1em 0;
+    }
+    .markdown-preview pre code { background: none; padding: 0; }
+    .markdown-preview blockquote {
+      border-left: 3px solid var(--accent); padding-left: 16px;
+      color: var(--text-muted); margin: 1em 0;
+    }
+    .markdown-preview img { max-width: 100%; border-radius: var(--radius); }
+    .markdown-preview a { color: var(--accent); }
+
+    .empty-editor {
+      flex: 1; display: flex; align-items: center; justify-content: center;
+      color: var(--text-muted); font-size: 15px;
+    }
+
+    /* Sync indicator */
+    .sync-badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: 12px; color: var(--text-muted);
+    }
+    .sync-badge.syncing { color: var(--orange); }
+    .sync-badge.synced { color: var(--green); }
+    .sync-badge.error { color: var(--red); }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    .spinning { animation: spin 1s linear infinite; display: inline-block; }
+
+    /* Settings in sidebar footer */
+    .settings-link {
+      font-size: 12px; color: var(--text-muted); cursor: pointer;
+      text-decoration: none;
+    }
+    .settings-link:hover { color: var(--text); }
+
+    /* Loading */
+    .loader {
+      display: inline-block; width: 16px; height: 16px;
+      border: 2px solid var(--border); border-top-color: var(--accent);
+      border-radius: 50%; animation: spin 0.6s linear infinite;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+  </style>
+</head>
+<body>
+
+  <!-- ═══ Setup Screen ═══ -->
+  <div id="setup-screen" class="screen">
+    <div class="setup-card">
+      <h1>Sat Book</h1>
+      <p class="subtitle">Your files on GitHub, without the headache.</p>
+
+      <label for="token-input">GitHub Token</label>
+      <input id="token-input" class="input" type="password" placeholder="ghp_xxxxxxxxxxxx" />
+      <p class="hint">
+        Need one? <a id="token-help-link">Create a token</a> with "repo" access.
+      </p>
+
+      <label>Projects Folder</label>
+      <div class="folder-row">
+        <div id="folder-display" class="folder-display">Not set</div>
+        <button id="folder-btn" class="btn btn-sm">Choose…</button>
+      </div>
+      <p class="hint">This is where your project folders will live on disk.</p>
+
+      <div class="setup-actions">
+        <button id="setup-continue" class="btn btn-primary" disabled>Get Started</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ Projects Screen ═══ -->
+  <div id="projects-screen" class="screen hidden">
+    <div class="projects-header">
+      <h1>Your Projects</h1>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button id="settings-btn" class="btn btn-ghost btn-sm">⚙</button>
+        <button id="new-project-btn" class="btn btn-primary">+ New Project</button>
+      </div>
+    </div>
+    <div id="project-list" class="project-list"></div>
+  </div>
+
+  <!-- ═══ New Project Modal ═══ -->
+  <div id="new-project-modal" class="modal-overlay hidden">
+    <div class="modal">
+      <h2>Add a Project</h2>
+      <div class="tab-bar">
+        <button id="tab-new" class="active" data-tab="new">Create New</button>
+        <button id="tab-existing" data-tab="existing">Existing Repo</button>
+      </div>
+
+      <div id="panel-new">
+        <label style="font-weight:500;display:block;margin-bottom:6px;">Project Name</label>
+        <input id="new-project-name" class="input" placeholder="my-sat-book" />
+      </div>
+
+      <div id="panel-existing" class="hidden">
+        <input id="repo-search" class="input" placeholder="Search your repos…" style="margin-bottom:8px;" />
+        <div id="repo-list" class="repo-list">
+          <div style="text-align:center;padding:20px;color:var(--text-muted);">
+            <span class="loader"></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button id="modal-cancel" class="btn">Cancel</button>
+        <button id="modal-create" class="btn btn-primary">Create</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ Editor Screen ═══ -->
+  <div id="editor-screen" class="hidden">
+    <div class="sidebar">
+      <div class="sidebar-header">
+        <button class="back-btn" id="editor-back" title="Back to projects">←</button>
+        <span class="project-title" id="editor-project-name"></span>
+      </div>
+      <div class="sidebar-actions">
+        <button class="btn btn-ghost btn-sm" id="new-file-btn" title="New file">+ New File</button>
+        <button class="btn btn-ghost btn-sm" id="open-finder-btn" title="Open in Finder">📁 Open Folder</button>
+      </div>
+      <div class="file-tree" id="file-tree"></div>
+      <div class="sidebar-footer">
+        <button id="sync-btn" class="btn" style="width:100%;justify-content:center;">
+          <span id="sync-label">↑ Save &amp; Sync</span>
+        </button>
+        <div id="sync-status" class="sync-badge">Ready</div>
+      </div>
+    </div>
+    <div class="editor-area">
+      <div class="editor-toolbar">
+        <span class="filename" id="editor-filename"></span>
+        <div class="editor-tabs">
+          <button class="editor-tab active" data-mode="write" id="tab-write">Write</button>
+          <button class="editor-tab" data-mode="preview" id="tab-preview">Preview</button>
+        </div>
+        <span class="status" id="editor-status"></span>
+      </div>
+      <div class="editor-content">
+        <div class="empty-editor" id="editor-empty">
+          Select a file to start editing, or create a new one.
+        </div>
+        <textarea id="editor-textarea" class="hidden" spellcheck="true"></textarea>
+        <div id="editor-preview" class="markdown-preview hidden"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
