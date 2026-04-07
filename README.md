@@ -1,137 +1,168 @@
 # Intranet Platform
 
-An open-source, self-hosted **WordPress-style plugin host** for your own
-private React apps. One self-hosted wrapper, one login, as many little
-personal apps as you like — wine tracker, book log, home inventory, recipe
-box — each a plugin you either write yourself, install from a GitHub URL,
-or (soon) generate from a prompt.
+A self-hosted, open-source **plugin host for private React apps**. One
+deployment, one login, as many personal apps as you want — wine tracker,
+recipes, shopping lists, whatever you vibe-code next.
 
-> Unlike WordPress, this isn't a CMS. Plugins are real React apps. The
-> platform's job is auth, access control, a plugin contract, and a place
-> for each plugin to store its data.
+![Dashboard](docs/screenshot.png)
 
-## What you get
+Think WordPress, but instead of a CMS you get a plugin system for real
+React apps behind invite-only auth. Plugins can use the built-in SQLite,
+or bring their own backend (Supabase, a public API, whatever).
 
-- **Closed-by-default auth.** The first person to register becomes the admin;
-  public signup locks automatically. Everyone else joins via invite link.
-- **One database, one auth, N apps.** Each plugin lives in `apps/<id>/` and
-  gets its own URL (`/apps/<id>`), its own API namespace
-  (`/api/apps/<id>/...`), its own SQLite tables (`app_<id>_*`), and its own
-  upload folder.
-- **Install plugins from GitHub, at runtime, without a server restart.**
-  Paste a repo URL into the admin panel — the platform clones it, builds
-  the client, runs any new migrations, and hot-mounts it live.
-- **Bring your own backend if you want.** Plugins are free to skip the
-  platform's SQLite entirely and talk to Supabase / a public API / whatever.
-  The plugin contract is "ship a `manifest.json` and a React mount function";
-  server code and migrations are optional.
-- **Per-plugin access control.** Admin picks which users can see which
-  plugins. Admins see everything by default.
+## Highlights
 
-## Self-hosting
+- **Closed-by-default.** First user = admin. Everyone else needs an invite.
+- **Install plugins from GitHub** — paste a URL, it clones, builds, and hot-mounts without a restart.
+- **AI-powered plugins** — the bundled apps use Claude Vision for label scanning, recipe extraction, and natural-language list parsing.
+- **Dark mode** — toggle in the nav, respects system preference.
+- **SQLite on disk** — zero config, one file, backed up by copying it.
+
+## Bundled plugins
+
+| Plugin | What it does |
+| --- | --- |
+| **Wine Tracker** | Snap a photo of a label → Claude reads it → auto-fills name, winery, vintage, region. Rate later, search, filter. |
+| **Recipes** | Paste messy text or photograph a recipe → Claude structures it into ingredients, steps, times, tags. |
+| **Shopping List** | Organize by store. Dump items via AI prompt. Check off as you shop, star favorites for buy-again. |
+
+## Quick start
 
 ```bash
-git clone <this-repo> intranet-platform
+git clone https://github.com/alnutile/intranet-platform.git
 cd intranet-platform
 docker compose up --build
 ```
 
-Open **http://localhost:3001**, fill out the register form — you become the
-admin, and public signup locks immediately.
-
-Volumes `./data` (SQLite + session store) and `./storage/uploads`
-(user-uploaded files) survive container rebuilds.
+Open **http://localhost:3001**, register, done. Add `ANTHROPIC_API_KEY` to
+your `.env` for AI features.
 
 ### Without Docker
 
 ```bash
 npm install
 npm run setup     # creates .env with a random SESSION_SECRET
-npm run build     # builds the host client bundle
-npm start         # starts Express on :3001 (serves the built client)
+npm run build     # builds the host client
+npm start         # Express on :3001
 ```
 
-For local development with hot reload on both sides:
+Dev mode (hot reload both sides):
 
 ```bash
-npm run dev       # server on :3001, Vite dev server on :5173
+npm run dev       # server :3001 + Vite :5173
 ```
 
-## Installing a plugin from GitHub
+## Using this as your own intranet
 
-1. Sign in as admin → **Plugins** (top nav) → **Install from GitHub**.
-2. Paste a `https://github.com/<owner>/<repo>` URL and (optionally) a branch.
-3. Hit **Install**. The platform will:
-   - shallow-clone the repo,
-   - validate `manifest.json`,
-   - build the client bundle,
-   - run any new migrations,
-   - hot-mount the server router (no restart required).
+This repo is meant to be **cloned, not forked** — you'll add your own
+plugins, your own data, your own `.env`. But you'll also want to pull in
+upstream improvements (new platform features, security fixes, UI polish)
+without losing your local changes.
 
-The new plugin immediately shows up on the dashboard for you (and for any
-members you grant access to under **Admin → Users**).
+Here's the workflow:
+
+### 1. Clone and set your own origin
+
+```bash
+git clone https://github.com/alnutile/intranet-platform.git my-intranet
+cd my-intranet
+
+# Point origin at your own private repo (GitHub, Gitea, wherever).
+git remote rename origin upstream
+git remote add origin git@github.com:you/my-intranet.git
+git push -u origin main
+```
+
+Now `origin` is yours and `upstream` points back here.
+
+### 2. Add your own plugins
+
+Drop folders into `apps/`. Your plugins, your commits, your `origin`.
+The platform doesn't care where plugins come from — they follow the same
+contract whether they're bundled, installed from GitHub, or hand-coded.
+
+### 3. Pull upstream updates
+
+When this repo ships something you want:
+
+```bash
+git fetch upstream
+git merge upstream/main
+```
+
+**Why this works cleanly:** the platform code lives in `server/` and
+`client/`. Your plugins live in `apps/`. Merge conflicts are rare because
+you're changing different directories. If we update a bundled plugin
+(e.g. wine-tracker) and you've customized it, you'll get a normal merge
+conflict that you resolve once.
+
+### 4. Ignore bundled plugins you don't want
+
+Don't want the wine tracker? Delete `apps/wine-tracker/` and commit.
+Upstream updates to that plugin will be no-ops since the directory
+doesn't exist in your tree.
 
 ## Writing a plugin
 
-Full contract: [`docs/APP_SPEC.md`](docs/APP_SPEC.md).
+Full contract: [`docs/APP_SPEC.md`](docs/APP_SPEC.md)
 
-Minimum viable plugin:
+Minimum:
 
 ```
 my-plugin/
-├── manifest.json                     # { id, name, icon, entry }
-└── client/src/main.tsx               # default-exports mount(el, ctx)
+├── manifest.json              # { id, name, icon, entry }
+└── client/src/main.tsx        # exports default mount(el, ctx)
 ```
 
-With server + migrations (if you want to use the platform's SQLite):
+With server + SQLite:
 
 ```
 my-plugin/
 ├── manifest.json
-├── migrations/001_init.sql
-├── server/index.ts                   # default-exports an Express Router
+├── migrations/001_init.sql    # tables prefixed app_<id>_
+├── server/index.ts            # exports Express Router
 └── client/src/main.tsx
 ```
 
-See `apps/wine-tracker/` in this repo for a working reference with photo
-uploads, server routes, and migrations.
+Plugins that talk to Supabase or a third-party API skip the server
+and migrations entirely — just ship the manifest and the client.
+
+## Installing a plugin from GitHub
+
+**Admin → Plugins → Install from GitHub** → paste a repo URL → Install.
+The platform clones it, validates the manifest, builds the client,
+runs migrations, and hot-mounts the server routes. No restart needed.
+
+## Environment variables
+
+| Variable | Required | Description |
+| --- | --- | --- |
+| `SESSION_SECRET` | Yes | Random string for cookie signing. Auto-generated by `npm run setup`. |
+| `DATABASE_PATH` | No | SQLite path. Default: `./persist/app.db` |
+| `UPLOAD_DIR` | No | File uploads. Default: `./persist/uploads` |
+| `ANTHROPIC_API_KEY` | No | Enables AI features (wine label scanning, recipe parsing, shopping list AI). |
+| `PORT` | No | Server port. Default: `3001`. |
 
 ## Project layout
 
 ```
-server/src/
-  index.ts                Entry point
-  db/                     SQLite connection + core schema + migration runner
-  routes/                 auth, invites, users, apps, admin-apps, health
-  middleware/             requireAuth, requireAdmin, requireAppAccess
-  lib/
-    app-loader.ts         Hot-mount outer/inner router shim
-    app-installer.ts      git clone + validate + install + uninstall
-    plugin-builder.ts     Vite lib-mode build for plugin clients
-    module-cache.ts       Scoped require-cache busting (never touches shared code)
-    uploads.ts            Per-plugin multer storage
-client/src/
-  App.tsx                 Router shell
-  pages/                  Login, Register, Dashboard, Admin, AdminApps, AppHost
-  components/ui/          shadcn-style primitives
-  lib/                    api client, auth context
-apps/
-  wine-tracker/           Reference plugin (full-stack example)
+server/src/           Platform server (Express, SQLite, auth, plugin loader)
+client/src/           Platform client (React, Tailwind, shadcn-style UI)
+apps/                 Plugins live here
+  wine-tracker/       Bundled: wine logging with AI label scan
+  recipes/            Bundled: recipe management with AI extraction
+  shopping-list/      Bundled: store-based shopping lists with AI prompt
 docs/
-  APP_SPEC.md             Plugin contract
-data/app.db               SQLite database (gitignored)
-storage/uploads/<id>/     User-uploaded files per plugin (gitignored)
+  APP_SPEC.md         Plugin contract specification
 ```
 
 ## Roadmap
 
-- **Now**: self-hosting + GitHub plugin install + hot-mount (this PR).
-- **Next**: in-app AI builder — describe an app in natural language inside
-  the platform and have Claude scaffold it in seconds.
-- **Then**: MCP server so Claude Desktop / Claude Code / Cursor can all build
-  plugins for this platform from the outside using one shared tool spec.
-- **Later**: in-app Monaco editor with "Ask AI to modify this file"; other
-  providers (OpenAI, Ollama).
+See [ROADMAP.md](ROADMAP.md) for the full plan. Next up:
+
+- In-app AI builder (describe an app → Claude scaffolds it)
+- MCP server so Claude Code / Cursor can build plugins from outside
+- In-app Monaco editor with AI assist
 
 ## License
 
