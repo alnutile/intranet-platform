@@ -52,13 +52,17 @@ export function App({ ctx }: { ctx: MountContext }) {
   }
 
   async function saveRecipe(data: Partial<Recipe>) {
-    // Ensure arrays are JSON strings.
+    // Ensure arrays are JSON strings for the server.
     const body: any = { ...data };
-    if (Array.isArray(body.ingredients))
-      body.ingredients = JSON.stringify(body.ingredients);
-    if (Array.isArray(body.instructions))
-      body.instructions = JSON.stringify(body.instructions);
-    if (Array.isArray(body.tags)) body.tags = JSON.stringify(body.tags);
+    for (const key of ["ingredients", "instructions", "tags"]) {
+      const val = body[key];
+      if (Array.isArray(val)) {
+        body[key] = JSON.stringify(val);
+      } else if (typeof val === "string" && !val.startsWith("[")) {
+        // Newline-separated text from the form → JSON array
+        body[key] = JSON.stringify(val.split("\n").map((s: string) => s.trim()).filter(Boolean));
+      }
+    }
 
     if (data.id) {
       await ctx.api(`/${data.id}`, { method: "PUT", body: JSON.stringify(body) });
@@ -498,8 +502,10 @@ function Field({
   );
 }
 
-function parseJsonArray(val: string | null | undefined): string[] {
+function parseJsonArray(val: any): string[] {
   if (!val) return [];
+  if (Array.isArray(val)) return val.map(String);
+  if (typeof val !== "string") return [];
   try {
     const parsed = JSON.parse(val);
     return Array.isArray(parsed) ? parsed : [];
