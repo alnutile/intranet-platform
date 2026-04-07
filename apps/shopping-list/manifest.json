@@ -1,0 +1,7 @@
+{
+  "id": "shopping-list",
+  "name": "Shopping List",
+  "description": "Organize shopping by store. Dump items via AI prompt, check off as you shop, buy-again favorites.",
+  "icon": "ShoppingCart",
+  "entry": "client/dist/index.js"
+}
