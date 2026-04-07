@@ -163,7 +163,7 @@ const recipeSchema = z.object({
   instructions: z.string().default("[]"),
   cuisine: z.string().max(100).optional().nullable().default(null),
   tags: z.string().optional().nullable().default(null),
-  source_text: z.string().max(10000).optional().nullable().default(null),
+  source_text: z.string().max(50000).optional().nullable().default(null),
   photo_filename: z.string().optional().nullable().default(null),
   cover_filename: z.string().optional().nullable().default(null),
 });
