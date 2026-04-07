@@ -32,11 +32,14 @@ export function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle>Sign in</CardTitle>
-          <CardDescription>Welcome back to your intranet.</CardDescription>
+    <div className="flex min-h-screen items-center justify-center p-4 bg-background">
+      <Card className="w-full max-w-md rounded-xl shadow-sm">
+        <CardHeader className="text-center">
+          <div className="h-10 w-10 rounded-lg bg-primary flex items-center justify-center mx-auto mb-2">
+            <span className="text-primary-foreground font-bold">I</span>
+          </div>
+          <CardTitle className="text-2xl">Welcome back</CardTitle>
+          <CardDescription>Sign in to your intranet.</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={submit} className="space-y-4">
