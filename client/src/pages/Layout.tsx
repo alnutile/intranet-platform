@@ -1,34 +1,63 @@
-import { Link, Outlet, useNavigate } from "react-router-dom";
+import { Link, Outlet, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/ui/button";
+import { useTheme } from "@/hooks/use-theme";
 
 export function Layout() {
   const { user, logout } = useAuth();
   const nav = useNavigate();
+  const loc = useLocation();
+  const { resolved, toggle } = useTheme();
   if (!user) return null;
 
+  const isActive = (path: string) =>
+    loc.pathname === path
+      ? "text-primary font-medium"
+      : "text-muted-foreground hover:text-foreground transition-colors";
+
   return (
-    <div className="min-h-screen flex flex-col">
-      <header className="border-b bg-card">
-        <div className="container flex h-14 items-center justify-between">
-          <div className="flex items-center gap-6">
-            <Link to="/" className="font-semibold">Intranet</Link>
-            {user.role === "admin" && (
-              <>
-                <Link to="/admin" className="text-sm text-muted-foreground hover:text-foreground">
-                  Admin
-                </Link>
-                <Link to="/admin/apps" className="text-sm text-muted-foreground hover:text-foreground">
-                  Plugins
-                </Link>
-              </>
-            )}
+    <div className="min-h-screen flex flex-col bg-background">
+      {/* Glassmorphic header — no border-b, tonal separation via backdrop */}
+      <header className="sticky top-0 z-50 bg-surface/70 backdrop-blur-xl">
+        <div className="container flex h-16 items-center justify-between">
+          <div className="flex items-center gap-8">
+            <Link to="/" className="flex items-center gap-2.5">
+              <div className="h-8 w-8 rounded-lg gradient-primary flex items-center justify-center shadow-ambient-sm">
+                <span className="text-primary-foreground font-bold text-sm">I</span>
+              </div>
+              <span className="font-display font-semibold text-lg tracking-tight">
+                Intranet
+              </span>
+            </Link>
+            <nav className="hidden sm:flex items-center gap-6 text-sm">
+              <Link to="/" className={isActive("/")}>Dashboard</Link>
+              {user.role === "admin" && (
+                <>
+                  <Link to="/admin" className={isActive("/admin")}>Users</Link>
+                  <Link to="/admin/apps" className={isActive("/admin/apps")}>Plugins</Link>
+                </>
+              )}
+            </nav>
           </div>
           <div className="flex items-center gap-3">
-            <span className="text-sm text-muted-foreground">{user.name}</span>
+            <button
+              onClick={toggle}
+              className="h-8 w-8 rounded-lg bg-surface-container-low flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
+              title={`Theme: ${resolved}`}
+            >
+              {resolved === "dark" ? "🌙" : "☀️"}
+            </button>
+            <div className="hidden sm:flex items-center gap-2">
+              <div className="h-8 w-8 rounded-full bg-primary-container flex items-center justify-center">
+                <span className="text-primary text-sm font-semibold">
+                  {user.name.charAt(0).toUpperCase()}
+                </span>
+              </div>
+              <span className="text-sm font-medium">{user.name}</span>
+            </div>
             <Button
               size="sm"
-              variant="outline"
+              variant="secondary"
               onClick={async () => {
                 await logout();
                 nav("/login", { replace: true });
@@ -39,8 +68,10 @@ export function Layout() {
           </div>
         </div>
       </header>
-      <main className="flex-1 container py-8">
-        <Outlet />
+      <main className="flex-1 bg-surface-container-low">
+        <div className="container py-10">
+          <Outlet />
+        </div>
       </main>
     </div>
   );
