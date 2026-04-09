@@ -139,6 +139,24 @@ CREATE TABLE IF NOT EXISTS app_myapp_items (
 - When parsing images, use the Messages API with `type: "image"` content.
 - When parsing text, ask for JSON-only output and strip markdown fences.
 
+### Editable prompts
+Prompts are stored in a shared `prompts` table so admins can tweak AI
+behavior from the UI (Admin → Prompts) without pushing code.
+
+- **Import:** `import { getPrompt } from "../../../server/src/lib/prompts";`
+- **Key convention:** `snake_case_plugin_id.action` — e.g. `wine_tracker.scan`,
+  `recipes.parse_text`, `shopping_list.parse`.
+- **Usage:** Define your hardcoded default as a const, then call:
+  ```ts
+  const prompt = getPrompt("my_app.summarize", DEFAULT_PROMPT);
+  ```
+  If an admin has customized the prompt in the UI, the DB version is
+  returned. Otherwise the hardcoded default is used.
+- **Dynamic data:** Append user input after the prompt, don't embed it:
+  ```ts
+  content: getPrompt("my_app.parse", DEFAULT_PARSE_PROMPT) + userText,
+  ```
+
 ## Reference plugins
 
 Study these for working examples:

@@ -1,8 +1,22 @@
 import { Router } from "express";
 import { z } from "zod";
 import { db } from "../../../server/src/db";
+import { getPrompt } from "../../../server/src/lib/prompts";
 
 const router = Router();
+
+const DEFAULT_PARSE_PROMPT = `Parse this into a shopping list. Return ONLY valid JSON — an array of items:
+[
+  { "name": "Milk", "quantity": "1 gallon", "category": "Dairy" },
+  { "name": "Bananas", "quantity": "1 bunch", "category": "Produce" }
+]
+
+Categories should be standard grocery sections: Produce, Dairy, Meat, Bakery, Frozen, Pantry, Beverages, Snacks, Household, Personal Care, Other.
+If quantity isn't mentioned, leave it null.
+No markdown, no explanation, just the JSON array.
+
+Here is the input:
+`;
 
 // ─── Stores ─────────────────────────────────────────────────────────────────
 
@@ -180,18 +194,7 @@ router.post("/parse", async (req, res) => {
       messages: [
         {
           role: "user",
-          content: `Parse this into a shopping list. Return ONLY valid JSON — an array of items:
-[
-  { "name": "Milk", "quantity": "1 gallon", "category": "Dairy" },
-  { "name": "Bananas", "quantity": "1 bunch", "category": "Produce" }
-]
-
-Categories should be standard grocery sections: Produce, Dairy, Meat, Bakery, Frozen, Pantry, Beverages, Snacks, Household, Personal Care, Other.
-If quantity isn't mentioned, leave it null.
-No markdown, no explanation, just the JSON array.
-
-Here is the input:
-${text}`,
+          content: getPrompt("shopping_list.parse", DEFAULT_PARSE_PROMPT) + text,
         },
       ],
     });

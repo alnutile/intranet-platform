@@ -47,6 +47,7 @@ export function Layout() {
                 <>
                   <Link to="/admin" className={isActive("/admin")}>Users</Link>
                   <Link to="/admin/apps" className={isActive("/admin/apps")}>Plugins</Link>
+                  <Link to="/admin/prompts" className={isActive("/admin/prompts")}>Prompts</Link>
                 </>
               )}
             </nav>
@@ -111,6 +112,7 @@ export function Layout() {
               <>
                 {mobileLink("/admin", "Users")}
                 {mobileLink("/admin/apps", "Plugins")}
+                {mobileLink("/admin/prompts", "Prompts")}
               </>
             )}
             <div className="flex items-center gap-2 pt-3">

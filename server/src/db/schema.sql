@@ -59,3 +59,13 @@ CREATE TABLE IF NOT EXISTS installed_apps (
   ref TEXT,
   installed_at INTEGER NOT NULL DEFAULT (strftime('%s','now'))
 );
+
+-- Editable AI prompts. Plugins check here first; if no row exists they
+-- fall back to their hardcoded default. key = "plugin_id.action",
+-- e.g. "wine_tracker.scan", "recipes.parse_text".
+CREATE TABLE IF NOT EXISTS prompts (
+  key TEXT PRIMARY KEY,
+  prompt_text TEXT NOT NULL,
+  updated_at INTEGER NOT NULL DEFAULT (strftime('%s','now')),
+  updated_by INTEGER REFERENCES users(id)
+);

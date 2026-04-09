@@ -6,6 +6,7 @@ import { Layout } from "@/pages/Layout";
 import { DashboardPage } from "@/pages/Dashboard";
 import { AdminPage } from "@/pages/Admin";
 import { AdminAppsPage } from "@/pages/AdminApps";
+import { AdminPromptsPage } from "@/pages/AdminPrompts";
 import { AppHost } from "@/pages/AppHost";
 
 function Protected({ children }: { children: React.ReactNode }) {
@@ -33,6 +34,7 @@ export default function App() {
             <Route path="/" element={<DashboardPage />} />
             <Route path="/admin" element={<AdminPage />} />
             <Route path="/admin/apps" element={<AdminAppsPage />} />
+            <Route path="/admin/prompts" element={<AdminPromptsPage />} />
             <Route path="/apps/:appId/*" element={<AppHost />} />
           </Route>
         </Routes>

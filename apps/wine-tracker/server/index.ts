@@ -4,9 +4,27 @@ import path from "path";
 import { z } from "zod";
 import { db } from "../../../server/src/db";
 import { appUploader } from "../../../server/src/lib/uploads";
+import { getPrompt } from "../../../server/src/lib/prompts";
 
 const router = Router();
 const upload = appUploader("wine-tracker");
+
+const DEFAULT_SCAN_PROMPT = `You are looking at a wine bottle label or wine-related image.
+Extract as much information as you can and return ONLY a JSON object with these fields (use null for anything you can't determine):
+
+{
+  "name": "the wine name",
+  "winery": "producer / winery name",
+  "vintage": 2020,
+  "varietal": "grape variety, e.g. Cabernet Sauvignon",
+  "grape": "same as varietal, or a blend description",
+  "region": "wine region, e.g. Napa Valley, Barossa Valley",
+  "country": "country of origin",
+  "color": "red" | "white" | "rosé" | "sparkling" | "dessert" | "orange",
+  "notes": "any other interesting details you can read from the label"
+}
+
+Return ONLY valid JSON, no markdown, no explanation.`;
 
 // ─── AI scan ────────────────────────────────────────────────────────────────
 
@@ -42,22 +60,7 @@ router.post("/scan", upload.single("photo"), async (req, res) => {
             },
             {
               type: "text",
-              text: `You are looking at a wine bottle label or wine-related image.
-Extract as much information as you can and return ONLY a JSON object with these fields (use null for anything you can't determine):
-
-{
-  "name": "the wine name",
-  "winery": "producer / winery name",
-  "vintage": 2020,
-  "varietal": "grape variety, e.g. Cabernet Sauvignon",
-  "grape": "same as varietal, or a blend description",
-  "region": "wine region, e.g. Napa Valley, Barossa Valley",
-  "country": "country of origin",
-  "color": "red" | "white" | "rosé" | "sparkling" | "dessert" | "orange",
-  "notes": "any other interesting details you can read from the label"
-}
-
-Return ONLY valid JSON, no markdown, no explanation.`,
+              text: getPrompt("wine_tracker.scan", DEFAULT_SCAN_PROMPT),
             },
           ],
         },

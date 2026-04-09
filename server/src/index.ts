@@ -9,6 +9,7 @@ import inviteRoutes from "./routes/invites";
 import userRoutes from "./routes/users";
 import appRoutes from "./routes/apps";
 import adminAppsRoutes from "./routes/admin-apps";
+import promptsRoutes from "./routes/prompts";
 import healthRoutes from "./routes/health";
 import { mountAllApps, getApp } from "./lib/app-loader";
 import { buildAllPlugins } from "./lib/plugin-builder";
@@ -33,6 +34,7 @@ async function main() {
   app.use("/api/users", userRoutes);
   app.use("/api/apps", appRoutes);
   app.use("/api/admin/apps", adminAppsRoutes);
+  app.use("/api/prompts", promptsRoutes);
 
   // Mount every plugin's stable outer router under /api/apps/<id>.
   // The inner routers can be swapped at runtime by the installer.

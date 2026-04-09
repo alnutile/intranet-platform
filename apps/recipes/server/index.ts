@@ -3,9 +3,43 @@ import fs from "fs";
 import { z } from "zod";
 import { db } from "../../../server/src/db";
 import { appUploader } from "../../../server/src/lib/uploads";
+import { getPrompt } from "../../../server/src/lib/prompts";
 
 const router = Router();
 const upload = appUploader("recipes", { maxBytes: 15 * 1024 * 1024 });
+
+const DEFAULT_SCAN_PROMPT = `Extract the recipe from this image. Return ONLY valid JSON:
+{
+  "title": "Recipe name",
+  "description": "Brief description",
+  "prep_time": "15 min",
+  "cook_time": "30 min",
+  "servings": "4",
+  "ingredients": ["1 cup flour", "2 eggs", ...],
+  "instructions": ["Step 1...", "Step 2...", ...],
+  "cuisine": "Italian",
+  "tags": ["pasta", "quick"]
+}
+No markdown, no explanation, just JSON.`;
+
+const DEFAULT_PARSE_PROMPT = `Clean up and structure this recipe text into a proper recipe. Return ONLY valid JSON:
+{
+  "title": "Recipe name",
+  "description": "Brief appetizing description",
+  "prep_time": "15 min",
+  "cook_time": "30 min",
+  "servings": "4",
+  "ingredients": ["1 cup flour", "2 eggs", ...],
+  "instructions": ["Preheat oven to 350°F.", "Mix dry ingredients.", ...],
+  "cuisine": "Italian",
+  "tags": ["pasta", "quick"]
+}
+No markdown, no explanation, just JSON.
+
+Here is the recipe text:
+`;
+
+const DEFAULT_COVER_PROMPT = `Generate a short, vivid one-sentence visual description of what the finished dish would look like plated beautifully. This will be used as alt text / image description. Be specific about colors, textures, garnishes. Just the description, nothing else.`;
 
 // ─── AI: extract recipe from image ─────────────────────────────────────────
 
@@ -34,19 +68,7 @@ router.post("/scan", upload.single("photo"), async (req, res) => {
             { type: "image", source: { type: "base64", media_type: mediaType, data: base64 } },
             {
               type: "text",
-              text: `Extract the recipe from this image. Return ONLY valid JSON:
-{
-  "title": "Recipe name",
-  "description": "Brief description",
-  "prep_time": "15 min",
-  "cook_time": "30 min",
-  "servings": "4",
-  "ingredients": ["1 cup flour", "2 eggs", ...],
-  "instructions": ["Step 1...", "Step 2...", ...],
-  "cuisine": "Italian",
-  "tags": ["pasta", "quick"]
-}
-No markdown, no explanation, just JSON.`,
+              text: getPrompt("recipes.scan", DEFAULT_SCAN_PROMPT),
             },
           ],
         },
@@ -88,22 +110,7 @@ router.post("/parse", async (req, res) => {
       messages: [
         {
           role: "user",
-          content: `Clean up and structure this recipe text into a proper recipe. Return ONLY valid JSON:
-{
-  "title": "Recipe name",
-  "description": "Brief appetizing description",
-  "prep_time": "15 min",
-  "cook_time": "30 min",
-  "servings": "4",
-  "ingredients": ["1 cup flour", "2 eggs", ...],
-  "instructions": ["Preheat oven to 350°F.", "Mix dry ingredients.", ...],
-  "cuisine": "Italian",
-  "tags": ["pasta", "quick"]
-}
-No markdown, no explanation, just JSON.
-
-Here is the recipe text:
-${text}`,
+          content: getPrompt("recipes.parse_text", DEFAULT_PARSE_PROMPT) + text,
         },
       ],
     });
@@ -139,7 +146,7 @@ router.post("/generate-cover", async (req, res) => {
       messages: [
         {
           role: "user",
-          content: `Generate a short, vivid one-sentence visual description of what the finished dish "${title}" (${cuisine || "home cooking"}) would look like plated beautifully. This will be used as alt text / image description. Be specific about colors, textures, garnishes. Just the description, nothing else.`,
+          content: getPrompt("recipes.cover_description", DEFAULT_COVER_PROMPT) + `\n\nDish: "${title}" (${cuisine || "home cooking"})`,
         },
       ],
     });
