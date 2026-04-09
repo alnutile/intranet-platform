@@ -112,7 +112,7 @@ export function App({ ctx }: { ctx: MountContext }) {
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Recipes</h1>
+          <h1 className="text-4xl font-bold tracking-tight" style={{ fontFamily: "Manrope, system-ui, sans-serif" }}>Recipes</h1>
           <p className="text-muted-foreground">
             {recipes.length} recipe{recipes.length !== 1 ? "s" : ""} saved
           </p>
@@ -127,7 +127,7 @@ export function App({ ctx }: { ctx: MountContext }) {
       )}
 
       {filtered.length === 0 ? (
-        <div className="rounded-lg border bg-card p-10 text-center text-muted-foreground">
+        <div className="rounded-2xl bg-white shadow-[0_2px_12px_rgba(42,52,57,0.04)] dark:bg-gray-900 p-10 text-center text-muted-foreground">
           {recipes.length === 0
             ? 'No recipes yet — tap "+ Add recipe" to get started.'
             : "No matches."}
@@ -195,7 +195,7 @@ function AddView({
     return (
       <div className="max-w-lg mx-auto space-y-6">
         <button className={btnGhost} onClick={onCancel}>← Back</button>
-        <div className="rounded-lg border bg-card p-10 text-center space-y-3">
+        <div className="rounded-2xl bg-white shadow-[0_2px_12px_rgba(42,52,57,0.04)] dark:bg-gray-900 p-10 text-center space-y-3">
           <div className="animate-pulse text-lg font-medium">Reading recipe…</div>
           <p className="text-sm text-muted-foreground">Claude is extracting the recipe from your image</p>
         </div>
@@ -314,7 +314,7 @@ function FormView({
       <h2 className="text-2xl font-bold">{isEdit ? "Edit recipe" : "New recipe"}</h2>
 
       {initial.photo_filename && (
-        <img src={`/uploads/recipes/${initial.photo_filename}`} alt="Source" className="w-full max-h-48 object-contain rounded-lg border" />
+        <img src={`/uploads/recipes/${initial.photo_filename}`} alt="Source" className="w-full max-h-48 object-contain rounded-xl" />
       )}
 
       <form onSubmit={submit} className="space-y-4">
@@ -376,11 +376,11 @@ function DetailView({
       <button className={btnGhost} onClick={onBack}>← Back</button>
 
       {recipe.cover_filename && (
-        <img src={`/uploads/recipes/${recipe.cover_filename}`} alt={recipe.title} className="w-full max-h-72 object-cover rounded-lg" />
+        <img src={`/uploads/recipes/${recipe.cover_filename}`} alt={recipe.title} className="w-full max-h-72 object-cover rounded-xl" />
       )}
 
       <div>
-        <h2 className="text-3xl font-bold">{recipe.title}</h2>
+        <h2 className="text-4xl font-bold tracking-tight" style={{ fontFamily: "Manrope, system-ui, sans-serif" }}>{recipe.title}</h2>
         {recipe.description && <p className="text-muted-foreground mt-1">{recipe.description}</p>}
       </div>
 
@@ -425,7 +425,7 @@ function DetailView({
         </ol>
       </div>
 
-      <div className="flex gap-3 pt-4 border-t">
+      <div className="flex gap-3 pt-6">
         <button className={btnOutline} onClick={onEdit}>Edit</button>
         <button
           className="inline-flex h-10 items-center rounded-md bg-destructive px-4 text-sm font-medium text-destructive-foreground hover:bg-destructive/90"
@@ -444,7 +444,7 @@ function RecipeCard({ recipe, onClick }: { recipe: Recipe; onClick: () => void }
   const tags = parseJsonArray(recipe.tags);
   return (
     <div
-      className="rounded-lg border bg-card text-card-foreground shadow-sm overflow-hidden cursor-pointer transition hover:border-foreground/30 hover:shadow-md"
+      className="rounded-2xl bg-white shadow-[0_2px_12px_rgba(42,52,57,0.04)] dark:bg-gray-900 text-card-foreground overflow-hidden cursor-pointer transition hover:shadow-md"
       onClick={onClick}
     >
       {recipe.cover_filename ? (
@@ -476,7 +476,7 @@ function RecipeCard({ recipe, onClick }: { recipe: Recipe; onClick: () => void }
 
 function Badge({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-md border px-3 py-1.5">
+    <div className="rounded-full bg-blue-50 px-3 py-1 text-blue-700 dark:bg-blue-950/30 dark:text-blue-300">
       <div className="text-[10px] text-muted-foreground uppercase tracking-wider">{label}</div>
       <div className="text-sm font-medium">{value}</div>
     </div>
@@ -516,8 +516,16 @@ function parseJsonArray(val: any): string[] {
 
 // ─── Styles ─────────────────────────────────────────────────────────────────
 
-const btnPrimary = "inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50";
-const btnOutline = "inline-flex h-10 items-center justify-center rounded-md border border-input bg-background px-4 text-sm font-medium hover:bg-accent";
-const btnGhost = "text-sm text-muted-foreground hover:text-foreground";
-const inputCls = "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm";
+const btnPrimary =
+  "inline-flex h-10 items-center justify-center rounded-lg px-5 text-sm font-medium text-white transition-all disabled:opacity-50 " +
+  "bg-gradient-to-br from-[hsl(221,100%,43%)] to-[hsl(227,100%,93%)] " +
+  "shadow-[0_2px_12px_rgba(0,83,219,0.15)] hover:shadow-[0_4px_24px_rgba(0,83,219,0.2)]";
+const btnOutline =
+  "inline-flex h-10 items-center justify-center rounded-lg bg-gray-50 px-4 text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700";
+const btnGhost =
+  "text-sm text-muted-foreground hover:text-foreground transition-colors";
+const inputCls =
+  "flex h-10 w-full rounded-lg bg-gray-100 px-3 py-2 text-sm placeholder:text-gray-400 " +
+  "focus:outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-colors " +
+  "dark:bg-gray-800 dark:focus:bg-gray-900 dark:placeholder:text-gray-500";
 const labelCls = "text-sm font-medium leading-none";

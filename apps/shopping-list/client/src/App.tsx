@@ -108,7 +108,7 @@ function StoresView({
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Shopping Lists</h1>
+          <h1 className="text-4xl font-bold tracking-tight" style={{ fontFamily: "Manrope, system-ui, sans-serif" }}>Shopping Lists</h1>
           <p className="text-muted-foreground">Pick a store to start shopping.</p>
         </div>
         <button className={btnPrimary} onClick={() => setAdding(!adding)}>
@@ -119,7 +119,7 @@ function StoresView({
       {err && <p className="text-destructive">{err}</p>}
 
       {adding && (
-        <form onSubmit={addStore} className="rounded-xl border bg-card p-4 space-y-4">
+        <form onSubmit={addStore} className="rounded-2xl bg-white shadow-[0_2px_12px_rgba(42,52,57,0.04)] dark:bg-gray-900 p-4 space-y-4">
           <div className="space-y-2">
             <label className={labelCls}>Store name</label>
             <input className={inputCls} value={name} onChange={(e) => setName(e.target.value)} placeholder="Trader Joe's, Costco…" required />
@@ -131,7 +131,7 @@ function StoresView({
                 <button
                   key={key}
                   type="button"
-                  className={`h-10 w-10 rounded-lg border text-xl flex items-center justify-center transition ${icon === key ? "ring-2 ring-primary bg-primary/10" : "hover:bg-muted"}`}
+                  className={`h-10 w-10 rounded-lg bg-gray-50 dark:bg-gray-800 text-xl flex items-center justify-center transition ${icon === key ? "ring-2 ring-primary bg-primary/10" : "hover:bg-muted"}`}
                   onClick={() => setIcon(key)}
                   title={key}
                 >
@@ -159,7 +159,7 @@ function StoresView({
       )}
 
       {stores.length === 0 && !adding ? (
-        <div className="rounded-xl border bg-card p-12 text-center text-muted-foreground">
+        <div className="rounded-2xl bg-white shadow-[0_2px_12px_rgba(42,52,57,0.04)] dark:bg-gray-900 p-12 text-center text-muted-foreground">
           No stores yet — add your first store to get started.
         </div>
       ) : (
@@ -167,7 +167,7 @@ function StoresView({
           {stores.map((s) => (
             <div
               key={s.id}
-              className="group relative rounded-xl border bg-card p-5 cursor-pointer transition-all hover:shadow-md hover:-translate-y-0.5"
+              className="group relative rounded-2xl bg-white shadow-[0_2px_12px_rgba(42,52,57,0.04)] dark:bg-gray-900 p-5 cursor-pointer transition-all hover:shadow-md hover:-translate-y-0.5"
               onClick={() => onOpen(s)}
             >
               <button
@@ -329,7 +329,7 @@ function ListView({
 
           {/* Pending items by category */}
           {pending.length === 0 && bought.length === 0 ? (
-            <div className="rounded-xl border bg-card p-8 text-center text-muted-foreground">
+            <div className="rounded-2xl bg-white shadow-[0_2px_12px_rgba(42,52,57,0.04)] dark:bg-gray-900 p-8 text-center text-muted-foreground">
               List is empty. Add items manually or use the AI prompt.
             </div>
           ) : (
@@ -369,7 +369,7 @@ function ListView({
                     {bought.map((item) => (
                       <div
                         key={item.id}
-                        className="flex items-center gap-3 rounded-lg border bg-card px-3 py-2 group"
+                        className="flex items-center gap-3 rounded-2xl bg-white shadow-[0_2px_12px_rgba(42,52,57,0.04)] dark:bg-gray-900 px-3 py-2 group"
                       >
                         <button
                           className="h-5 w-5 rounded border-2 flex items-center justify-center text-xs"
@@ -403,7 +403,7 @@ function ListView({
 
         {/* AI prompt panel */}
         <div className="lg:w-80 shrink-0">
-          <div className="rounded-xl border bg-card p-4 space-y-3 lg:sticky lg:top-24">
+          <div className="rounded-2xl bg-white shadow-[0_2px_12px_rgba(42,52,57,0.04)] dark:bg-gray-900 p-4 space-y-3 lg:sticky lg:top-24">
             <h3 className="font-semibold text-sm">AI Add Items</h3>
             <p className="text-xs text-muted-foreground">
               Dump a list, a recipe, or just say what you need. AI will parse it into items.
@@ -447,7 +447,7 @@ function ItemRow({
   onDelete: (e: React.MouseEvent) => void;
 }) {
   return (
-    <div className="flex items-center gap-3 rounded-lg border bg-card px-3 py-2.5 group transition hover:border-foreground/10">
+    <div className="flex items-center gap-3 rounded-2xl bg-white shadow-[0_2px_12px_rgba(42,52,57,0.04)] dark:bg-gray-900 px-3 py-2.5 group transition">
       <button
         className="h-5 w-5 rounded border-2 flex items-center justify-center shrink-0 transition"
         style={{ borderColor: storeColor }}
@@ -478,7 +478,14 @@ function ItemRow({
 
 // ─── Styles ─────────────────────────────────────────────────────────────────
 
-const btnPrimary = "inline-flex h-10 items-center justify-center rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50";
-const btnGhost = "text-sm text-muted-foreground hover:text-foreground";
-const inputCls = "flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm";
+const btnPrimary =
+  "inline-flex h-10 items-center justify-center rounded-lg px-5 text-sm font-medium text-white transition-all disabled:opacity-50 " +
+  "bg-gradient-to-br from-[hsl(221,100%,43%)] to-[hsl(227,100%,93%)] " +
+  "shadow-[0_2px_12px_rgba(0,83,219,0.15)] hover:shadow-[0_4px_24px_rgba(0,83,219,0.2)]";
+const btnGhost =
+  "text-sm text-muted-foreground hover:text-foreground transition-colors";
+const inputCls =
+  "flex h-10 w-full rounded-lg bg-gray-100 px-3 py-2 text-sm placeholder:text-gray-400 " +
+  "focus:outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-colors " +
+  "dark:bg-gray-800 dark:focus:bg-gray-900 dark:placeholder:text-gray-500";
 const labelCls = "text-sm font-medium leading-none";

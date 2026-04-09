@@ -38,13 +38,13 @@ export function RegisterPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center p-4 bg-background">
-      <Card className="w-full max-w-md rounded-xl shadow-sm">
+    <div className="flex min-h-screen items-center justify-center p-4 bg-surface-container-low">
+      <Card className="w-full max-w-md rounded-2xl shadow-ambient">
         <CardHeader className="text-center">
-          <div className="h-10 w-10 rounded-lg bg-primary flex items-center justify-center mx-auto mb-2">
+          <div className="h-10 w-10 rounded-lg gradient-primary flex items-center justify-center mx-auto mb-2 shadow-ambient-sm">
             <span className="text-primary-foreground font-bold">I</span>
           </div>
-          <CardTitle className="text-2xl">{isBootstrap ? "Set up your intranet" : "Accept your invite"}</CardTitle>
+          <CardTitle className="font-display text-2xl">{isBootstrap ? "Set up your intranet" : "Accept your invite"}</CardTitle>
           <CardDescription>
             {isBootstrap
               ? "You're the first here — this account becomes the admin and public registration will be locked."

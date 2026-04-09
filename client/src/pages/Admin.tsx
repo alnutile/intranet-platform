@@ -75,7 +75,7 @@ export function AdminPage() {
 
   return (
     <div className="space-y-8">
-      <h1 className="text-3xl font-bold">Admin</h1>
+      <h1 className="font-display text-4xl font-bold tracking-tight">Admin</h1>
       {err && <p className="text-destructive">{err}</p>}
 
       <Card>
@@ -98,7 +98,7 @@ export function AdminPage() {
             <Button type="submit">Create invite</Button>
           </form>
           {newInvite && (
-            <div className="mt-4 rounded-md bg-secondary p-3 text-sm">
+            <div className="mt-4 rounded-xl bg-surface-container-low p-4 text-sm">
               Share this link:
               <div className="mt-1 font-mono break-all">
                 {window.location.origin}/register?invite={newInvite.token}
@@ -116,9 +116,9 @@ export function AdminPage() {
           {invites.length === 0 ? (
             <p className="text-sm text-muted-foreground">No invites yet.</p>
           ) : (
-            <ul className="divide-y">
+            <ul className="space-y-3">
               {invites.map((inv) => (
-                <li key={inv.token} className="flex items-center justify-between py-2">
+                <li key={inv.token} className="flex items-center justify-between rounded-xl bg-surface-container-low p-3">
                   <div className="text-sm">
                     <div className="font-medium">{inv.email || "(any email)"}</div>
                     <div className="text-muted-foreground">
@@ -182,7 +182,7 @@ function UserRow({ user, apps }: { user: User; apps: AppManifest[] }) {
   }
 
   return (
-    <div className="rounded-md border p-3">
+    <div className="rounded-xl bg-surface-container-low p-4">
       <div className="flex items-center justify-between">
         <div>
           <div className="font-medium">{user.name}</div>
@@ -201,7 +201,7 @@ function UserRow({ user, apps }: { user: User; apps: AppManifest[] }) {
           {apps.map((a) => (
             <label
               key={a.id}
-              className="flex items-center gap-2 rounded-md border px-2 py-1 text-sm cursor-pointer"
+              className="flex items-center gap-2 rounded-full bg-secondary-container px-3 py-1.5 text-sm cursor-pointer"
             >
               <input type="checkbox" checked={granted.has(a.id)} onChange={() => toggle(a.id)} />
               {a.name}

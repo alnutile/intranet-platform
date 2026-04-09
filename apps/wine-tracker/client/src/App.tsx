@@ -132,7 +132,7 @@ export function App({ ctx }: { ctx: MountContext }) {
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Wine Tracker</h1>
+          <h1 className="text-4xl font-bold tracking-tight" style={{ fontFamily: "Manrope, system-ui, sans-serif" }}>Wine Tracker</h1>
           <p className="text-muted-foreground">
             {wines.length} wine{wines.length !== 1 ? "s" : ""} in your cellar
           </p>
@@ -154,7 +154,7 @@ export function App({ ctx }: { ctx: MountContext }) {
       )}
 
       {filtered.length === 0 ? (
-        <div className="rounded-lg border bg-card p-10 text-center text-muted-foreground">
+        <div className="rounded-2xl bg-white shadow-[0_2px_12px_rgba(42,52,57,0.04)] dark:bg-gray-900 p-10 text-center text-muted-foreground">
           {wines.length === 0
             ? "No wines yet — tap \"+ Add wine\" to scan your first bottle."
             : "No matches."}
@@ -227,7 +227,7 @@ function ScanView({
       </div>
 
       {scanning ? (
-        <div className="rounded-lg border bg-card p-10 text-center space-y-3">
+        <div className="rounded-2xl bg-white shadow-[0_2px_12px_rgba(42,52,57,0.04)] dark:bg-gray-900 p-10 text-center space-y-3">
           <div className="animate-pulse text-lg font-medium">Scanning label…</div>
           <p className="text-sm text-muted-foreground">
             Claude is reading your wine label
@@ -306,7 +306,7 @@ function FormView({
         <img
           src={`/uploads/wine-tracker/${initial.photo_filename}`}
           alt="Wine label"
-          className="w-full max-h-64 object-contain rounded-lg border"
+          className="w-full max-h-64 object-contain rounded-xl"
         />
       )}
 
@@ -383,12 +383,12 @@ function DetailView({
         <img
           src={`/uploads/wine-tracker/${wine.photo_filename}`}
           alt={wine.name}
-          className="w-full max-h-96 object-contain rounded-lg border"
+          className="w-full max-h-96 object-contain rounded-xl"
         />
       )}
 
       <div>
-        <h2 className="text-3xl font-bold">{wine.name}</h2>
+        <h2 className="text-4xl font-bold tracking-tight" style={{ fontFamily: "Manrope, system-ui, sans-serif" }}>{wine.name}</h2>
         {wine.winery && <p className="text-lg text-muted-foreground">{wine.winery}</p>}
       </div>
 
@@ -414,7 +414,7 @@ function DetailView({
         </div>
       )}
 
-      <div className="flex gap-3 pt-4 border-t">
+      <div className="flex gap-3 pt-6">
         <button className={btnOutline} onClick={onEdit}>Edit</button>
         <button
           className="inline-flex h-10 items-center rounded-md bg-destructive px-4 text-sm font-medium text-destructive-foreground hover:bg-destructive/90"
@@ -442,7 +442,7 @@ function WineCard({
 }) {
   return (
     <div
-      className="rounded-lg border bg-card text-card-foreground shadow-sm overflow-hidden cursor-pointer transition hover:border-foreground/30 hover:shadow-md"
+      className="rounded-2xl bg-white shadow-[0_2px_12px_rgba(42,52,57,0.04)] dark:bg-gray-900 text-card-foreground overflow-hidden cursor-pointer transition hover:shadow-md"
       onClick={onClick}
     >
       {wine.photo_filename ? (
@@ -500,7 +500,7 @@ function StarRating({
 
 function InfoRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-md border px-3 py-2">
+    <div className="rounded-xl bg-gray-50 px-4 py-2.5 dark:bg-gray-800">
       <div className="text-xs text-muted-foreground">{label}</div>
       <div className="font-medium capitalize">{value}</div>
     </div>
@@ -537,11 +537,15 @@ function Field({
 // ─── Style constants ────────────────────────────────────────────────────────
 
 const btnPrimary =
-  "inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50";
+  "inline-flex h-10 items-center justify-center rounded-lg px-5 text-sm font-medium text-white transition-all disabled:opacity-50 " +
+  "bg-gradient-to-br from-[hsl(221,100%,43%)] to-[hsl(227,100%,93%)] " +
+  "shadow-[0_2px_12px_rgba(0,83,219,0.15)] hover:shadow-[0_4px_24px_rgba(0,83,219,0.2)]";
 const btnOutline =
-  "inline-flex h-10 items-center justify-center rounded-md border border-input bg-background px-4 text-sm font-medium hover:bg-accent";
+  "inline-flex h-10 items-center justify-center rounded-lg bg-gray-50 px-4 text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700";
 const btnGhost =
-  "text-sm text-muted-foreground hover:text-foreground";
+  "text-sm text-muted-foreground hover:text-foreground transition-colors";
 const inputCls =
-  "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm";
+  "flex h-10 w-full rounded-lg bg-gray-100 px-3 py-2 text-sm placeholder:text-gray-400 " +
+  "focus:outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-colors " +
+  "dark:bg-gray-800 dark:focus:bg-gray-900 dark:placeholder:text-gray-500";
 const labelCls = "text-sm font-medium leading-none";

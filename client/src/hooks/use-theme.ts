@@ -1,45 +1,47 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 type Theme = "light" | "dark" | "system";
 
-function getSystemTheme(): "light" | "dark" {
+function getSystemPreference(): "light" | "dark" {
   return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
 }
 
-function applyTheme(theme: Theme) {
-  const resolved = theme === "system" ? getSystemTheme() : theme;
+function resolve(theme: Theme): "light" | "dark" {
+  return theme === "system" ? getSystemPreference() : theme;
+}
+
+function applyClass(resolved: "light" | "dark") {
   document.documentElement.classList.toggle("dark", resolved === "dark");
 }
 
 export function useTheme() {
   const [theme, setThemeState] = useState<Theme>(() => {
     const stored = localStorage.getItem("theme") as Theme | null;
-    return stored || "system";
+    return stored ?? "system";
   });
 
-  useEffect(() => {
-    applyTheme(theme);
-    localStorage.setItem("theme", theme);
-  }, [theme]);
+  const resolved = resolve(theme);
 
-  // Listen for system theme changes when in "system" mode.
+  useEffect(() => {
+    applyClass(resolved);
+  }, [resolved]);
+
   useEffect(() => {
     if (theme !== "system") return;
     const mq = window.matchMedia("(prefers-color-scheme: dark)");
-    const handler = () => applyTheme("system");
+    const handler = () => applyClass(getSystemPreference());
     mq.addEventListener("change", handler);
     return () => mq.removeEventListener("change", handler);
   }, [theme]);
 
-  function toggle() {
-    setThemeState((t) => {
-      if (t === "light") return "dark";
-      if (t === "dark") return "system";
-      return "light";
-    });
-  }
+  const setTheme = useCallback((t: Theme) => {
+    localStorage.setItem("theme", t);
+    setThemeState(t);
+  }, []);
 
-  const resolved = theme === "system" ? getSystemTheme() : theme;
+  const toggle = useCallback(() => {
+    setTheme(resolved === "dark" ? "light" : "dark");
+  }, [resolved, setTheme]);
 
-  return { theme, resolved, setTheme: setThemeState, toggle };
+  return { theme, resolved, setTheme, toggle };
 }

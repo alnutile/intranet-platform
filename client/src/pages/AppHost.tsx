@@ -71,7 +71,7 @@ export function AppHost() {
         </Link>
       </div>
       {error && (
-        <div className="rounded-md border border-destructive/50 bg-destructive/10 p-4 text-sm text-destructive">
+        <div className="rounded-xl bg-red-50 p-4 text-sm text-destructive dark:bg-red-950/20">
           {error}
         </div>
       )}

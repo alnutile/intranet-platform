@@ -91,7 +91,7 @@ export function AdminAppsPage() {
 
   return (
     <div className="space-y-8">
-      <h1 className="text-3xl font-bold">Plugins</h1>
+      <h1 className="font-display text-4xl font-bold tracking-tight">Plugins</h1>
 
       <Card>
         <CardHeader>
@@ -139,13 +139,13 @@ export function AdminAppsPage() {
           {apps.length === 0 ? (
             <p className="text-sm text-muted-foreground">No plugins installed yet.</p>
           ) : (
-            <ul className="divide-y">
+            <ul className="space-y-3">
               {apps.map((a) => (
-                <li key={a.id} className="flex items-center justify-between py-3">
+                <li key={a.id} className="flex items-center justify-between rounded-xl bg-surface-container-low p-4">
                   <div>
                     <div className="font-medium">
                       {a.name}{" "}
-                      <span className="ml-2 rounded bg-secondary px-1.5 py-0.5 text-xs text-muted-foreground">
+                      <span className="ml-2 rounded-full bg-secondary-container px-2.5 py-0.5 text-xs text-muted-foreground">
                         {a.source}
                       </span>
                     </div>
