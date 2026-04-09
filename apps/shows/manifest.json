@@ -1,0 +1,7 @@
+{
+  "id": "shows",
+  "name": "Shows to Watch",
+  "description": "Track shows and movies — AI adds summaries, streaming info, and genre tags.",
+  "icon": "Tv",
+  "entry": "client/dist/index.js"
+}

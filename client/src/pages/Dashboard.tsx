@@ -20,6 +20,8 @@ const ICON_COLORS: Record<string, { bg: string; fg: string }> = {
   Dumbbell: { bg: "bg-red-50", fg: "text-red-600" },
   Plane: { bg: "bg-sky-50", fg: "text-sky-600" },
   ShoppingCart: { bg: "bg-amber-50", fg: "text-amber-600" },
+  Tv: { bg: "bg-violet-50", fg: "text-violet-600" },
+  Bookmark: { bg: "bg-cyan-50", fg: "text-cyan-600" },
 };
 
 const DEFAULT_COLOR = { bg: "bg-primary/10", fg: "text-primary" };

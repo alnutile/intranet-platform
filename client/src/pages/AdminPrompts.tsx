@@ -19,6 +19,7 @@ const KNOWN_PROMPTS: Array<{ key: string; label: string; plugin: string }> = [
   { key: "recipes.parse_text", label: "Recipe text parse", plugin: "Recipes" },
   { key: "recipes.cover_description", label: "Cover image description", plugin: "Recipes" },
   { key: "shopping_list.parse", label: "Shopping list parse", plugin: "Shopping List" },
+  { key: "shows.enrich", label: "Show/movie enrichment", plugin: "Shows to Watch" },
 ];
 
 export function AdminPromptsPage() {
