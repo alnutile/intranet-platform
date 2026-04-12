@@ -370,6 +370,40 @@ function DetailView({
   const ingredients = parseJsonArray(recipe.ingredients);
   const instructions = parseJsonArray(recipe.instructions);
   const tags = parseJsonArray(recipe.tags);
+  const [copied, setCopied] = useState(false);
+
+  function toMarkdown(): string {
+    const lines: string[] = [];
+    lines.push(`# ${recipe.title}`);
+    if (recipe.description) lines.push("", recipe.description);
+
+    const meta: string[] = [];
+    if (recipe.prep_time) meta.push(`**Prep:** ${recipe.prep_time}`);
+    if (recipe.cook_time) meta.push(`**Cook:** ${recipe.cook_time}`);
+    if (recipe.servings) meta.push(`**Serves:** ${recipe.servings}`);
+    if (recipe.cuisine) meta.push(`**Cuisine:** ${recipe.cuisine}`);
+    if (meta.length) lines.push("", meta.join(" · "));
+
+    if (tags.length) lines.push("", `*${tags.join(", ")}*`);
+
+    if (ingredients.length) {
+      lines.push("", "## Ingredients", "");
+      ingredients.forEach((item) => lines.push(`- ${item}`));
+    }
+
+    if (instructions.length) {
+      lines.push("", "## Instructions", "");
+      instructions.forEach((step, i) => lines.push(`${i + 1}. ${step}`));
+    }
+
+    return lines.join("\n");
+  }
+
+  async function copyMarkdown() {
+    await navigator.clipboard.writeText(toMarkdown());
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  }
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
@@ -426,6 +460,9 @@ function DetailView({
       </div>
 
       <div className="flex gap-3 pt-6">
+        <button className={btnOutline} onClick={copyMarkdown}>
+          {copied ? "Copied!" : "Copy recipe"}
+        </button>
         <button className={btnOutline} onClick={onEdit}>Edit</button>
         <button
           className="inline-flex h-10 items-center rounded-md bg-destructive px-4 text-sm font-medium text-destructive-foreground hover:bg-destructive/90"
